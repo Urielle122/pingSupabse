@@ -1,0 +1,37 @@
+# -----------------------------
+# Fichiers Go / modules
+# -----------------------------
+/bin/
+/pkg/
+/*.exe
+/*.out
+/*.test
+
+# -----------------------------
+# Fichiers temporaires / IDE
+# -----------------------------
+*.swp
+*.tmp
+*.log
+*.DS_Store
+.vscode/
+.idea/
+
+# -----------------------------
+# Fichiers secrets / configuration
+# -----------------------------
+.env
+.env.local
+.env.*.local
+
+# -----------------------------
+# GitHub Actions / CI
+# -----------------------------
+# Rien à ignorer ici, sauf secrets locaux si existants
+
+# -----------------------------
+# MacOS / Linux / Windows
+# -----------------------------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
