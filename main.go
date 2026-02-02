@@ -60,7 +60,7 @@ func main() {
 			log.Println("✅ Supabase ping OK")
 
 			if slackWebhook != "" {
-				notifySlack(slackWebhook, "✅ Supabase ping OK (GitHub Actions)")
+				notifySlack(slackWebhook, "✅ Supabase pings OK (GitHub Actions)")
 			}
 			return
 		}
