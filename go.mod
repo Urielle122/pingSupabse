@@ -1,4 +1,4 @@
-module pingSupabase
+module github.com/Urielle122/pingSupabse
 
 go 1.25.1
 
