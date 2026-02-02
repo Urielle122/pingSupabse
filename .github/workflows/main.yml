@@ -10,21 +10,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout du repo
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2️⃣ Installer Go
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: "1.25"
 
-      # 3️⃣ Installer dépendances
       - name: Install dependencies
         run: go mod tidy
 
-      # 4️⃣ Ping Supabase
+      - name: Run tests & collect coverage
+        run: |
+          go test ./... -coverprofile=coverage.out || true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.out
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        continue-on-error: true
+
       - name: Ping Supabase
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
