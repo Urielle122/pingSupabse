@@ -1,5 +1,4 @@
-cp go.mod go.mod.bak
-awk 'NR==1{$0="module github.com/Urielle122/pingSupabse"}1' go.mod.bak > go.mod
+module github.com/Urielle122/pingSupabse
 
 go 1.25.1
 
