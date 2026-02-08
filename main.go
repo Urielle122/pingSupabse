@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -31,6 +32,55 @@ func pingDB(dsn string) error {
 	return conn.Ping(ctx)
 }
 
+func fetchCategories(dsn string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	conn, err := pgx.Connect(ctx, dsn)
+	if err != nil {
+		return "", err
+	}
+	defer conn.Close(ctx)
+
+	rows, err := conn.Query(ctx, `SELECT * FROM "catégories"`)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+
+	fields := rows.FieldDescriptions()
+
+	var result string
+	count := 0
+
+	for rows.Next() {
+		values, err := rows.Values()
+		if err != nil {
+			return "", err
+		}
+
+		result += "• "
+		for i, v := range values {
+			result += string(fields[i].Name) + "=" + toString(v) + " | "
+		}
+		result += "\n"
+		count++
+	}
+
+	if count == 0 {
+		return "⚠️ Aucune catégorie trouvée", nil
+	}
+
+	return result, nil
+}
+
+func toString(v any) string {
+	if v == nil {
+		return "NULL"
+	}
+	return fmt.Sprintf("%v", v)
+}
+
 func notifySlack(webhook, message string) {
 	payload := map[string]string{
 		"text": message,
@@ -44,7 +94,6 @@ func notifySlack(webhook, message string) {
 }
 
 func main() {
-	// 🔹 Charge .env si présent (local), ignore si absent (GitHub Actions)
 	_ = godotenv.Load()
 
 	dsn := os.Getenv("DATABASE_URL")
@@ -59,8 +108,24 @@ func main() {
 		if err == nil {
 			log.Println("✅ Supabase ping OK")
 
+			categories, err := fetchCategories(dsn)
+			if err != nil {
+				log.Println("❌ Erreur SELECT categories:", err)
+
+				if slackWebhook != "" {
+					notifySlack(
+						slackWebhook,
+						"⚠️ Ping OK mais SELECT categories FAILED:\n"+err.Error(),
+					)
+				}
+				return
+			}
+
 			if slackWebhook != "" {
-				notifySlack(slackWebhook, "✅ Supabase pings OK (GitHub Actions)")
+				notifySlack(
+					slackWebhook,
+					"✅ Supabase ping OK\n📂 *Categories list*:\n"+categories,
+				)
 			}
 			return
 		}
