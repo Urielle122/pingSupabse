@@ -42,7 +42,7 @@ func fetchCategories(dsn string) (string, error) {
 	}
 	defer conn.Close(ctx)
 
-	rows, err := conn.Query(ctx, `SELECT * FROM "categories"`)
+	rows, err := conn.Query(ctx, `SHOW TABLES"`)
 	if err != nil {
 		return "", err
 	}
