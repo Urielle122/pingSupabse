@@ -68,7 +68,7 @@ func fetchCategories(dsn string) (string, error) {
 	}
 
 	if count == 0 {
-		return "⚠️ Aucune catégorie trouvée", nil
+		return "Aucune catégorie trouvée", nil
 	}
 
 	return result, nil
@@ -100,22 +100,22 @@ func main() {
 	slackWebhook := os.Getenv("SLACK_WEBHOOK_URL")
 
 	if dsn == "" {
-		log.Fatal("❌ DATABASE_URL non définie")
+		log.Fatal("DATABASE_URL non définie")
 	}
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		err := pingDB(dsn)
 		if err == nil {
-			log.Println("✅ Supabase ping OK")
+			log.Println("Supabase ping OK")
 
 			categories, err := fetchCategories(dsn)
 			if err != nil {
-				log.Println("❌ Erreur SELECT categories:", err)
+				log.Println("Erreur SELECT categories:", err)
 
 				if slackWebhook != "" {
 					notifySlack(
 						slackWebhook,
-						"⚠️ Ping OK mais SELECT categories FAILED:\n"+err.Error(),
+						"Ping OK mais SELECT categories FAILED:\n"+err.Error(),
 					)
 				}
 				return
@@ -124,14 +124,14 @@ func main() {
 			if slackWebhook != "" {
 				notifySlack(
 					slackWebhook,
-					"✅ Supabase ping OK\n📂 *Categories list*:\n"+categories,
+					"Supabase ping OK\n *Categories list*:\n"+categories,
 				)
 			}
 			return
 		}
 
 		log.Printf(
-			"❌ Ping échoué (tentative %d/%d): %v",
+			"Ping échoué (tentative %d/%d): %v",
 			attempt,
 			maxRetries,
 			err,
@@ -140,12 +140,12 @@ func main() {
 		time.Sleep(retryDelay)
 	}
 
-	log.Println("🚨 Supabase ping FAILED après retries")
+	log.Println("Supabase ping FAILED après retries")
 
 	if slackWebhook != "" {
 		notifySlack(
 			slackWebhook,
-			"🚨 Supabase ping FAILED après 3 retries (GitHub Actions)",
+			"Supabase ping FAILED après 3 retries (GitHub Actions)",
 		)
 	}
 
